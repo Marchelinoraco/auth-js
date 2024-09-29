@@ -1,9 +1,62 @@
 "use client";
 import { motion } from "framer-motion";
-
-import React from "react";
+import axios from "axios";
+import React, { useState } from "react";
+import Config from "@/app/config/config";
 
 const Galeri = () => {
+  const [file, setFile] = useState("");
+  const [preview, setPreview] = useState("");
+
+  const [openModal, setOpenModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState(""); // Untuk pesan modal
+  const [isSuccess, setIsSuccess] = useState(false); // Untuk mengatur status keberhasilan
+
+  const loadImage = async (e) => {
+    const gambar = e.target.files[0];
+    setFile(gambar);
+    setPreview(URL.createObjectURL(gambar));
+  };
+
+  const resetForm = () => {
+    setFile(null);
+    setPreview("");
+  };
+
+  const sendData = async (e) => {
+    e.preventDefault();
+
+    if (!file) {
+      setModalMessage(" field harus diisi!"); // Pesan untuk modal
+      setIsSuccess(false); // Set modal untuk kegagalan (warna merah)
+      setOpenModal(true);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await axios.post(`${Config.ipPUBLIC}/galeri`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setModalMessage("Gambar berhasil ditambahkan!");
+      setIsSuccess(true); // Set modal untuk keberhasilan (warna hijau)
+      setOpenModal(true);
+      resetForm(); // Reset form setelah berhasil
+      setTimeout(() => {
+        setOpenModal(false); // Sembunyikan modal setelah beberapa detik
+      }, 3000); // 3 detik
+    } catch (error) {
+      console.error(error);
+      setModalMessage("Gagal menambahkan gambar!");
+      setIsSuccess(false); // Set modal untuk kegagalan (warna merah)
+      setOpenModal(true);
+    }
+  };
+
   const [hasMounted, setHasMounted] = React.useState(false);
   React.useEffect(() => {
     setHasMounted(true);
@@ -40,11 +93,7 @@ const Galeri = () => {
                 Masukkan Gambar Dokumentasi Dinas
               </h2>
 
-              <form
-                action="https://formbold.com/s/unique_form_id"
-                method="POST"
-                className="py-4"
-              >
+              <form onSubmit={sendData} method="POST" className="py-4">
                 <div className="mb-7 ">
                   <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     Upload Gambar (PNG, JPG, JPEG)
@@ -52,8 +101,12 @@ const Galeri = () => {
                   <input
                     type="file"
                     accept=".png, .jpg, .jpeg"
+                    onChange={loadImage}
                     className="block w-full py-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
                   />
+                  {preview && (
+                    <img src={preview} alt="Preview" className="mt-4" />
+                  )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4 xl:justify-end">
@@ -81,6 +134,40 @@ const Galeri = () => {
             </motion.div>
           </div>
         </div>
+        {/* Popup Modal */}
+        {openModal && (
+          <>
+            {/* Overlay */}
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+
+            {/* Modal */}
+            <div
+              id="popup-modal"
+              tabIndex="-1"
+              className="fixed inset-0 z-50 flex justify-center items-center p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] max-h-full"
+            >
+              <div className="relative w-full max-w-md">
+                <div className="relative bg-white rounded-lg shadow">
+                  <div className="p-6 text-center">
+                    <h3
+                      className={`text-lg font-normal ${
+                        isSuccess ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      {modalMessage}
+                    </h3>
+                    <button
+                      onClick={() => setOpenModal(false)}
+                      className="mt-4 inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white hover:bg-blackho dark:bg-btndark"
+                    >
+                      Tutup
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </section>
       {/* <!-- ===== Galeri End ===== --> */}
     </>

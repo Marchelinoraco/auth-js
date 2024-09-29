@@ -12,6 +12,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.5.0",
     "@prisma/client": "^5.19.1",
+    "axios": "^1.7.7",
     "bcrypt-ts": "^5.0.2",
     "framer-motion": "^11.8.0",
     "next": "14.2.12",
