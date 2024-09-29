@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Galeri from "@/components/Galeri";
 
 const GaleriPage = () => {

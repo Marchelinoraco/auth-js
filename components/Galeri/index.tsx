@@ -1,8 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
-import Image from "next/image";
+
 import React from "react";
-import { auth } from "@/auth";
 
 const Galeri = () => {
   const [hasMounted, setHasMounted] = React.useState(false);
